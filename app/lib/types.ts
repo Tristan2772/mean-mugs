@@ -1,46 +1,53 @@
 export type ProductImages = {
-  id: string;
-  url: string;
-  width: number;
-  height: number;
-  altText: string | null;
+  id?: string | null;
+  url?: string | null;
+  width?: number | null;
+  height?: number | null;
+  altText?: string | null;
 };
 
 export type Product = {
   id: string;
   title: string;
   description: string;
-  available: boolean;
-  images: ProductImages[];
-  price: string;
-  compareAtPrice: string;
-};
-export type ProductNode = {
-  id: string;
-  title: string;
-  description: string;
+  handle: string;
   availableForSale: boolean;
   priceRange: {
     minVariantPrice: {
       amount: string;
-      currencyCode: string;
     };
   };
-  compareAtPriceRange: {
-    minVariantPrice: {
+  compareAtPriceRange?: {
+    maxVariantPrice: {
       amount: string;
-      currencyCode: string;
     };
   };
   images: {
-    edges: {
-      node: {
-        id: string;
-        url: string;
-        width: number;
-        height: number;
-        altText: string | null;
-      };
-    }[];
+    nodes: ProductImages[];
   };
+};
+
+export type CartLineMerchandiseProduct = Pick<Product, "id" | "title" | "handle" | "images">;
+
+export type CartLine = {
+  id: string;
+  quantity: number;
+  merchandise: {
+    id: string;
+    title: string;
+    product: CartLineMerchandiseProduct | null;
+  };
+};
+
+export type Cart = {
+  id: string;
+  checkoutUrl: string;
+  totalQuantity: number;
+  lines: {
+    nodes: CartLine[];
+  };
+};
+
+export type CurrentCartResponse = {
+  cart: Cart | null;
 };

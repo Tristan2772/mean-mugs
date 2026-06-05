@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-// const collectionHandles = ["featured", "whats-new"];
+// const collectionHandles = ["frontpage", "whats-new"];
 </script>
 
 <template>

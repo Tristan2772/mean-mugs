@@ -9,13 +9,13 @@
     <div class="hero-content text-neutral-content text-center">
       <div class="max-w-md">
         <h1 class="mb-5 text-5xl font-bold">
-          Hey there, deer
+          Lorem, ipsum dolor.
         </h1>
         <p class="mb-5">
-          Welcome to the Mag Stag Store. I have a plethora of crazy, funny, and crazy funny magnets so have a look, have a laugh, and have a mag from the Mag Stag!
+          Lorem ipsum dolor sit amet consectetur. Obcaecati, praesentium alias repellat aliquid deserunt possimus eligendi autem accusantium voluptatem quam id harum optio, qui perferendis!
         </p>
         <a href="#home-collections" class="btn btn-primary">
-          View Magnets
+          View Mugs
         </a>
       </div>
     </div>

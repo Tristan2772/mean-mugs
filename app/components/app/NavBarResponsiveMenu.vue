@@ -15,8 +15,6 @@ onMounted(() => {
     });
   });
 });
-
-const isDropdownOpen = ref(false);
 </script>
 
 <template>
@@ -33,19 +31,17 @@ const isDropdownOpen = ref(false);
         </NuxtLink>
       </li>
       <li v-for="(navDropdown, index) in navDropdowns" :key="index">
-        <details ref="detailRefs" @click="isDropdownOpen = !isDropdownOpen">
+        <details ref="detailRefs">
           <summary>
             {{ navDropdown.dropdownLabel }}
           </summary>
-          <Transition name="mobile-nav-top-fade">
-            <ul v-show="isDropdownOpen" class="p-2" :class="isMobileMenu ? '' : 'top-10 bg-base-100 min-w-40 z-10'">
-              <li v-for="(dropdownItem, itemIndex) in navDropdown.dropdownItems" :key="itemIndex">
-                <NuxtLink :to="dropdownItem.linkPath">
-                  {{ dropdownItem.linkLabel }}
-                </NuxtLink>
-              </li>
-            </ul>
-          </Transition>
+          <ul class="p-2" :class="isMobileMenu ? '' : 'top-10 bg-base-100 min-w-40 z-10'">
+            <li v-for="(dropdownItem, itemIndex) in navDropdown.dropdownItems" :key="itemIndex">
+              <NuxtLink :to="dropdownItem.linkPath">
+                {{ dropdownItem.linkLabel }}
+              </NuxtLink>
+            </li>
+          </ul>
         </details>
       </li>
     </ul>

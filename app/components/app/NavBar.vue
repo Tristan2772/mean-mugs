@@ -39,7 +39,7 @@ function toggleMobileNav() {
         <app-nav-bar-responsive-menu :is-mobile-menu="true" :is-open="isMobileNavOpen" />
       </div>
       <NuxtLink to="/" class="btn btn-ghost text-xl">
-        StagMag
+        Mean Mugs
       </NuxtLink>
     </div>
     <div class="navbar-center hidden lg:flex">

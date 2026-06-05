@@ -1,36 +1,57 @@
 <script lang="ts" setup>
 import type { ProductImages } from "~/lib/types";
 
-const props = defineProps({
-  title: String!,
-  description: String!,
-  available: Boolean!,
-  price: String!,
-  compareAtPrice: String!,
-  isActiveProduct: Boolean!,
-  images: {
-    type: Array as () => ProductImages[],
-    default: () => [],
-  },
+type ProductCardProps = {
+  title: string;
+  description: string;
+  available: boolean;
+  price: string;
+  compareAtPrice: string;
+  productId: string;
+  images?: ProductImages[];
+};
+
+const props = withDefaults(defineProps<ProductCardProps>(), {
+  images: () => [],
 });
+
+const isAddingToCart = ref(false);
+
+async function addProductToCartByProductId(productId: string) {
+  if (isAddingToCart.value) {
+    return;
+  }
+
+  isAddingToCart.value = true;
+
+  try {
+    await $fetch("/api/cart/add", {
+      method: "POST",
+      body: { productId },
+    });
+  }
+  finally {
+    isAddingToCart.value = false;
+  }
+}
 </script>
 
 <template>
-  <div
-    class="card card-sm shadow-sm"
-    :class="isActiveProduct ? 'bg-base-200 w-1/2' : 'bg-base-100'"
-  >
-    <figure v-if="props.images[0]">
+  <div class="card card-sm shadow-sm bg-base-300">
+    <figure v-if="props.images[0]?.url">
       <img
-        :src="props.images[0].url"
+        class="w-full aspect-square"
+        :src="props.images[0]?.url ?? ''"
         :alt="props.images[0].altText || props.title"
       >
     </figure>
-    <div v-if="props.isActiveProduct" class="card-body">
-      <h3 class="card-title">
+    <div class="card-body">
+      <h3 class="card-title text-lg">
         {{ props.title }}
       </h3>
-      <p>{{ props.description }}</p>
+      <p class="min-h-8 line-clamp-2">
+        {{ props.description }}
+      </p>
       <div class="flex justify-between">
         <div class="flex items-center gap-1">
           <p class="line-through text-xs">
@@ -41,8 +62,9 @@ const props = defineProps({
           </p>
         </div>
         <div class="card-actions justify-end">
-          <button class="btn btn-primary">
-            Buy Now
+          <button class="btn btn-primary" :disabled="isAddingToCart" @click="addProductToCartByProductId(props.productId)">
+            <Icon name="tabler:shopping-bag-plus" size="24" />
+            Add to Bag
           </button>
         </div>
       </div>

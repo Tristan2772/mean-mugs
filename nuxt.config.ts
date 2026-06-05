@@ -25,12 +25,12 @@ export default defineNuxtConfig({
     },
   },
   shopify: {
-    name: "mag-stag",
+    name: "meanmugs-2",
     clients: {
       storefront: {
-        apiVersion: "2025-07",
+        apiVersion: env.SHOPIFY_API_VERSION,
         publicAccessToken: env.SHOPIFY_PUBLIC_TOKEN,
-        documents: [],
+        // privateAccessToken: env.SHOPIFY_PRIVATE_TOKEN,
       },
     },
   },

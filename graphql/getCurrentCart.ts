@@ -1,8 +1,6 @@
 export const GET_CURRENT_CART = `#graphql
 query getCurrentCart($id: ID!) {
   cart(id: $id) {
-    id
-    checkoutUrl
     totalQuantity
     lines(first: 50) {
       nodes {

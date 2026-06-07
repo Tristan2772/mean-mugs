@@ -40,8 +40,6 @@ export type CartLine = {
 };
 
 export type Cart = {
-  id: string;
-  checkoutUrl: string;
   totalQuantity: number;
   lines: {
     nodes: CartLine[];

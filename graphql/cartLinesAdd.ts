@@ -3,7 +3,6 @@ mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
   cartLinesAdd(cartId: $cartId, lines: $lines) {
     cart {
       id
-      checkoutUrl
       totalQuantity
     }
     userErrors {

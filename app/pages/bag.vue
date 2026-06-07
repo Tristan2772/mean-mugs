@@ -4,6 +4,35 @@ import type { CartLine, CurrentCartResponse } from "~/lib/types";
 const { data, pending, error } = await useFetch<CurrentCartResponse>("/api/cart/current");
 
 const cartLines = computed<CartLine[]>(() => data.value?.cart?.lines?.nodes ?? []);
+const isStartingCheckout = ref(false);
+const checkoutError = ref<string | null>(null);
+
+async function startCheckout() {
+  if (isStartingCheckout.value || !cartLines.value.length) {
+    return;
+  }
+
+  isStartingCheckout.value = true;
+  checkoutError.value = null;
+
+  try {
+    const response = await $fetch<{ checkoutUrl: string }>("/api/cart/checkout-url");
+
+    if (!response.checkoutUrl) {
+      throw new Error("Missing checkout URL");
+    }
+
+    await navigateTo(response.checkoutUrl, {
+      external: true,
+    });
+  }
+  catch {
+    checkoutError.value = "We couldn't start checkout. Please try again.";
+  }
+  finally {
+    isStartingCheckout.value = false;
+  }
+}
 </script>
 
 <template>
@@ -40,6 +69,16 @@ const cartLines = computed<CartLine[]>(() => data.value?.cart?.lines?.nodes ?? [
             Quantity: {{ line.quantity }}
           </p>
         </div>
+      </div>
+
+      <div class="pt-2">
+        <button class="btn btn-primary gap-2" :disabled="isStartingCheckout" @click="startCheckout">
+          <span v-if="isStartingCheckout" class="loading loading-spinner loading-sm" />
+          <span>{{ isStartingCheckout ? "Redirecting..." : "Checkout" }}</span>
+        </button>
+        <p v-if="checkoutError" class="mt-2 text-sm text-error">
+          {{ checkoutError }}
+        </p>
       </div>
     </div>
 

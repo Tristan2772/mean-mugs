@@ -6,7 +6,7 @@ type ProductCardProps = {
   description: string;
   available: boolean;
   price: string;
-  compareAtPrice: string;
+  compareAtPrice?: string;
   productId: string;
   images?: ProductImages[];
 };

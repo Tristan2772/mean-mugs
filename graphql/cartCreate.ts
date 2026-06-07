@@ -3,7 +3,6 @@ mutation CartCreate($input: CartInput!) {
   cartCreate(input: $input) {
     cart {
       id
-      checkoutUrl
       totalQuantity
     }
     userErrors {

@@ -1,16 +1,28 @@
 <script lang="ts" setup>
-import type { CartLine, CurrentCartResponse } from "~/lib/types";
+import type { CartLine } from "~/lib/types";
 
-// Load current cart state from the secure server endpoint.
-const { data, pending, error, refresh } = await useFetch<CurrentCartResponse>("/api/cart/current");
+import { useCartStore } from "~/stores/useCartStore";
+
+const cartStore = useCartStore();
+await cartStore.ensureCartLoaded();
 
 // Local derived state and action status flags.
-const cartLines = computed<CartLine[]>(() => data.value?.cart?.lines?.nodes ?? []);
+const cartLines = cartStore.cartLines;
+const pending = cartStore.isLoading;
+const error = computed(() => cartStore.loadError.value);
 const isStartingCheckout = ref(false);
 const activeLineMutationId = ref<string | null>(null);
 const checkoutError = ref<string | null>(null);
 const lineActionError = ref<string | null>(null);
 const lineQuantityDrafts = ref<Record<string, number | null>>({});
+
+function formatLinePrice(line: CartLine): string {
+  return cartStore.formatLinePrice(line);
+}
+
+function formatUnitPrice(line: CartLine): string {
+  return cartStore.formatUnitPrice(line);
+}
 
 // Keep local quantity drafts aligned with current cart lines.
 watchEffect(() => {
@@ -65,15 +77,7 @@ async function updateLineQuantity(lineId: string, quantity: number) {
   lineActionError.value = null;
 
   try {
-    await $fetch("/api/cart/line/update", {
-      method: "POST",
-      body: {
-        lineId,
-        quantity,
-      },
-    });
-
-    await refresh();
+    await cartStore.updateLineQuantity(lineId, quantity);
   }
   catch {
     lineActionError.value = "We couldn't update quantity. Please try again.";
@@ -102,14 +106,7 @@ async function removeLine(lineId: string) {
   lineActionError.value = null;
 
   try {
-    await $fetch("/api/cart/line/remove", {
-      method: "POST",
-      body: {
-        lineId,
-      },
-    });
-
-    await refresh();
+    await cartStore.removeLine(lineId);
   }
   catch {
     lineActionError.value = "We couldn't remove that item. Please try again.";
@@ -168,53 +165,20 @@ async function startCheckout() {
     <!-- Populated cart view with line controls and checkout action. -->
     <div v-else-if="cartLines.length" class="mt-6 space-y-4">
       <!-- Per-line product details and quantity actions. -->
-      <div
+      <AppCartProductCard
         v-for="line in cartLines"
         :key="line.id"
-        class="flex items-center gap-4 rounded-lg bg-base-200 p-4"
-      >
-        <button
-          class="h-20 w-10 shrink-0 text-6xl leading-none font-thin text-base-content/30 transition-colors hover:text-error"
-          :disabled="isLineBusy(line.id)"
-          aria-label="Remove item"
-          @click="removeLine(line.id)"
-        >
-          <span v-if="isLineBusy(line.id)" class="loading loading-spinner loading-xs" />
-          <span v-else>&times;</span>
-        </button>
-        <img
-          v-if="line.merchandise.product?.images.nodes[0]?.url"
-          class="h-20 w-20 rounded-md object-cover"
-          :src="line.merchandise.product.images.nodes[0]?.url ?? ''"
-          :alt="line.merchandise.product.images.nodes[0]?.altText || line.merchandise.product.title"
-        >
-        <div class="min-w-0 flex-1">
-          <h3 class="truncate text-lg font-medium">
-            {{ line.merchandise.product?.title ?? line.merchandise.title }}
-          </h3>
-          <div class="mt-2 flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              max="999"
-              step="1"
-              class="input input-bordered input-sm w-24"
-              :disabled="isLineBusy(line.id)"
-              :value="getDraftQuantity(line.id) ?? ''"
-              @input="setDraftQuantity(line.id, ($event.target as HTMLInputElement).value)"
-            >
-            <button
-              v-if="hasQuantityChanged(line)"
-              class="btn btn-xs"
-              :disabled="isLineBusy(line.id) || !isDraftQuantityValid(line.id)"
-              @click="saveLineQuantity(line)"
-            >
-              <span v-if="isLineBusy(line.id)" class="loading loading-spinner loading-xs" />
-              <span v-else>Update</span>
-            </button>
-          </div>
-        </div>
-      </div>
+        :line="line"
+        :is-busy="isLineBusy(line.id)"
+        :draft-quantity="getDraftQuantity(line.id)"
+        :has-quantity-changed="hasQuantityChanged(line)"
+        :is-draft-quantity-valid="isDraftQuantityValid(line.id)"
+        :line-price="formatLinePrice(line)"
+        :line-unit-price="formatUnitPrice(line)"
+        @remove="removeLine(line.id)"
+        @draft-change="setDraftQuantity(line.id, $event)"
+        @save-quantity="saveLineQuantity(line)"
+      />
 
       <!-- Checkout action and inline action errors. -->
       <div class="pt-2 flex flex-col items-end">

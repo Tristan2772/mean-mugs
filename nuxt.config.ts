@@ -19,6 +19,14 @@ export default defineNuxtConfig({
   },
   css: ["./app/assets/css/main.css"],
 
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        forceConsistentCasingInFileNames: false,
+      },
+    },
+  },
+
   eslint: {
     config: {
       standalone: false,

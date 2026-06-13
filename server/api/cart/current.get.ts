@@ -11,6 +11,12 @@ function isValidCartId(cartId: string): boolean {
 
 function toPublicCart(cart: {
   totalQuantity?: number | null;
+  cost?: {
+    totalAmount?: {
+      amount?: string | null;
+      currencyCode?: string | null;
+    } | null;
+  } | null;
   lines?: {
     nodes?: unknown[];
   } | null;
@@ -21,6 +27,7 @@ function toPublicCart(cart: {
 
   return {
     totalQuantity: cart.totalQuantity ?? 0,
+    cost: cart.cost ?? null,
     lines: {
       nodes: cart.lines?.nodes ?? [],
     },

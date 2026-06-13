@@ -32,6 +32,12 @@ export type CartLineMerchandiseProduct = Pick<Product, "id" | "title" | "handle"
 export type CartLine = {
   id: string;
   quantity: number;
+  cost?: {
+    totalAmount?: {
+      amount: string;
+      currencyCode: string;
+    } | null;
+  } | null;
   merchandise: {
     id: string;
     title: string;
@@ -41,6 +47,12 @@ export type CartLine = {
 
 export type Cart = {
   totalQuantity: number;
+  cost?: {
+    totalAmount?: {
+      amount: string;
+      currencyCode: string;
+    } | null;
+  } | null;
   lines: {
     nodes: CartLine[];
   };

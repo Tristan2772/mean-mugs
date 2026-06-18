@@ -33,6 +33,7 @@ const products = computed<Product[]>(() => data.value?.collection?.products?.nod
         v-for="product in products"
         :key="product.id"
         :product-id="product.id"
+        :handle="product.handle"
         :title="product.title"
         :description="product.description"
         :available="product.availableForSale"

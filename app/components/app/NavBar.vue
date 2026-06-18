@@ -36,14 +36,14 @@ function toggleMobileNav() {
             />
           </Transition>
         </button>
-        <app-nav-bar-responsive-menu :is-mobile-menu="true" :is-open="isMobileNavOpen" />
+        <AppNavBarResponsiveMenu :is-mobile-menu="true" :is-open="isMobileNavOpen" />
       </div>
-      <NuxtLink to="/" class="btn btn-ghost text-xl">
-        Mean Mugs
+      <NuxtLink to="/" class="text-xl btn btn-ghost w-36 ml-4 flex items-center justify-center">
+        <AppPuzzledLogo />
       </NuxtLink>
     </div>
     <div class="navbar-center hidden lg:flex">
-      <app-nav-bar-responsive-menu :is-mobile-menu="false" />
+      <AppNavBarResponsiveMenu :is-mobile-menu="false" />
     </div>
     <div class="navbar-end">
       <NuxtLink to="/bag" class="btn">

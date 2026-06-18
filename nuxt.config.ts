@@ -33,7 +33,7 @@ export default defineNuxtConfig({
     },
   },
   shopify: {
-    name: "meanmugs-2",
+    name: "puzzled-9854",
     clients: {
       storefront: {
         apiVersion: env.SHOPIFY_API_VERSION,

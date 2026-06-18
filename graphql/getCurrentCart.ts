@@ -23,6 +23,10 @@ query getCurrentCart($id: ID!) {
           ... on ProductVariant {
             id
             title
+            selectedOptions {
+              name
+              value
+            }
             product {
               id
               title

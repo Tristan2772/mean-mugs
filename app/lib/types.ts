@@ -41,6 +41,10 @@ export type CartLine = {
   merchandise: {
     id: string;
     title: string;
+    selectedOptions?: Array<{
+      name: string;
+      value: string;
+    }>;
     product: CartLineMerchandiseProduct | null;
   };
 };

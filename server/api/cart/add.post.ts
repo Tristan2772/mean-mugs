@@ -17,6 +17,7 @@ const CART_COOKIE_OPTIONS = {
 
 type AddToCartBody = {
   productId?: string;
+  variantId?: string;
 };
 
 function isValidCartId(cartId: string): boolean {
@@ -37,27 +38,31 @@ export default defineEventHandler(async (event) => {
   // Parse and validate the incoming request payload.
   const body = await readBody<AddToCartBody>(event);
   const productId = body?.productId?.trim();
+  const variantId = body?.variantId?.trim();
 
-  if (!productId) {
+  if (!productId && !variantId) {
     throw createError({
       statusCode: 400,
-      statusMessage: "productId is required",
+      statusMessage: "productId or variantId is required",
     });
   }
 
-  // Load the product so we can resolve its first purchasable variant.
   const storefront = useStorefront();
-  const productResponse = await storefront.request(GET_PRODUCT_BY_ID, {
-    variables: {
-      id: productId,
-    },
-  });
+  let merchandiseId = variantId;
 
-  const product = productResponse.data?.product;
-  const variantId = product?.variants?.nodes?.[0]?.id;
+  // Fallback path: resolve a variant from productId when a variantId is not provided.
+  if (!merchandiseId && productId) {
+    const productResponse = await storefront.request(GET_PRODUCT_BY_ID, {
+      variables: {
+        id: productId,
+      },
+    });
 
-  // Stop early if the product does not expose a variant to add.
-  if (!variantId) {
+    const product = productResponse.data?.product;
+    merchandiseId = product?.variants?.nodes?.[0]?.id;
+  }
+
+  if (!merchandiseId) {
     throw createError({
       statusCode: 404,
       statusMessage: "Product variant not found",
@@ -80,7 +85,7 @@ export default defineEventHandler(async (event) => {
       const cartLinesResponse = await storefront.request(CART_LINES_ADD, {
         variables: {
           cartId: rawCartId,
-          lines: [{ merchandiseId: variantId, quantity: 1 }],
+          lines: [{ merchandiseId, quantity: 1 }],
         },
       });
 
@@ -128,7 +133,7 @@ export default defineEventHandler(async (event) => {
   const cartCreateResponse = await storefront.request(CART_CREATE, {
     variables: {
       input: {
-        lines: [{ merchandiseId: variantId, quantity: 1 }],
+        lines: [{ merchandiseId, quantity: 1 }],
       },
     },
   });

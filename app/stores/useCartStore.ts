@@ -75,6 +75,15 @@ export function useCartStore() {
     await fetchCart();
   }
 
+  async function addVariant(variantId: string) {
+    await requestFetch("/api/cart/add", {
+      method: "POST",
+      body: { variantId },
+    });
+
+    await fetchCart();
+  }
+
   async function updateLineQuantity(lineId: string, quantity: number) {
     await requestFetch("/api/cart/line/update", {
       method: "POST",
@@ -96,6 +105,15 @@ export function useCartStore() {
     });
 
     await fetchCart();
+  }
+
+  const cartSubtotal = computed(() => {
+    const amount = Number(cart.value?.cost?.totalAmount?.amount ?? 0);
+    return Number.isFinite(amount) ? amount : 0;
+  });
+
+  function formatSubtotal(): string {
+    return cartCurrencyFormatter.value.format(cartSubtotal.value);
   }
 
   function formatLinePrice(line: CartLine): string {
@@ -120,8 +138,11 @@ export function useCartStore() {
     fetchCart,
     ensureCartLoaded,
     addProduct,
+    addVariant,
     updateLineQuantity,
     removeLine,
+    cartSubtotal,
+    formatSubtotal,
     formatLinePrice,
     formatUnitPrice,
   };

@@ -18,6 +18,25 @@ const emit = defineEmits<{
   draftChange: [rawValue: string];
   saveQuantity: [];
 }>();
+
+function getVariantLabel(line: CartLine): string {
+  const variantTitle = line.merchandise.title;
+  const selectedOptionWithPieces = line.merchandise.selectedOptions?.find(option => /piece/i.test(option.name) || /piece/i.test(option.value));
+
+  const pieceLabel = selectedOptionWithPieces?.value
+    ?? variantTitle.match(/\d+\s*(pieces?|pcs?)/i)?.[0]
+    ?? null;
+
+  if (!pieceLabel) {
+    return variantTitle;
+  }
+
+  if (new RegExp(pieceLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i").test(variantTitle)) {
+    return variantTitle;
+  }
+
+  return `${variantTitle} - ${pieceLabel}`;
+}
 </script>
 
 <template>
@@ -43,6 +62,9 @@ const emit = defineEmits<{
       <h3 class="truncate text-lg font-medium">
         {{ props.line.merchandise.product?.title ?? props.line.merchandise.title }}
       </h3>
+      <p class="mt-1 text-sm text-base-content/65">
+        Variant: {{ getVariantLabel(props.line) }}
+      </p>
 
       <div class="mt-2 flex justify-between">
         <div class="flex items-center gap-2">

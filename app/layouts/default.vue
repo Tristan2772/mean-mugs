@@ -30,9 +30,9 @@ watch(y, (newY) => {
 <template>
   <div>
     <Transition name="nav-top-fade">
-      <app-nav-bar v-show="isNavbarVisible" />
+      <AppNavBar v-show="isNavbarVisible" />
     </Transition>
-    <div class="pt-20">
+    <div class="pt-19">
       <slot />
     </div>
   </div>

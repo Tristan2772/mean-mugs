@@ -4,7 +4,7 @@ import type { CartLine } from "~/lib/types";
 import { useCartStore } from "~/stores/useCartStore";
 
 const cartStore = useCartStore();
-await cartStore.ensureCartLoaded();
+await cartStore.fetchCart();
 
 // Local derived state and action status flags.
 const cartLines = cartStore.cartLines;
@@ -15,6 +15,46 @@ const activeLineMutationId = ref<string | null>(null);
 const checkoutError = ref<string | null>(null);
 const lineActionError = ref<string | null>(null);
 const lineQuantityDrafts = ref<Record<string, number | null>>({});
+const isRefreshingAfterReturn = ref(false);
+
+const isInitialLoad = computed(() => pending.value && !cartLines.value.length);
+
+async function refreshCartState() {
+  if (isRefreshingAfterReturn.value) {
+    return;
+  }
+
+  isRefreshingAfterReturn.value = true;
+
+  try {
+    await cartStore.fetchCart();
+  }
+  finally {
+    isRefreshingAfterReturn.value = false;
+  }
+}
+
+function handlePageShow(event: PageTransitionEvent) {
+  if (event.persisted) {
+    void refreshCartState();
+  }
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === "visible") {
+    void refreshCartState();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("pageshow", handlePageShow);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("pageshow", handlePageShow);
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+});
 
 function formatLinePrice(line: CartLine): string {
   return cartStore.formatLinePrice(line);
@@ -152,10 +192,16 @@ async function startCheckout() {
       your cart
     </h2>
 
+    <div v-if="isRefreshingAfterReturn" class="mt-3 inline-flex items-center gap-2 text-sm text-base-content/70">
+      <span class="loading loading-spinner loading-sm" />
+      <span>Refreshing your cart...</span>
+    </div>
+
     <!-- Initial data-loading state. -->
-    <p v-if="pending" class="mt-4">
-      Loading your cart...
-    </p>
+    <div v-if="isInitialLoad" class="mt-4 inline-flex items-center gap-2">
+      <span class="loading loading-spinner loading-sm" />
+      <span>Loading your cart...</span>
+    </div>
 
     <!-- Fetch failure state. -->
     <p v-else-if="error" class="mt-4 text-error">
@@ -182,6 +228,8 @@ async function startCheckout() {
 
       <!-- Checkout action and inline action errors. -->
       <div class="pt-2 flex flex-col items-end">
+        <!-- Cart subtotal from Shopify Storefront API -->
+        <AppCartSubtotal :subtotal="cartStore.formatSubtotal()" />
         <button class="btn btn-primary gap-2" :disabled="isStartingCheckout || Boolean(activeLineMutationId)" @click="startCheckout">
           <span v-if="isStartingCheckout" class="loading loading-spinner loading-sm" />
           <span>{{ isStartingCheckout ? "Redirecting..." : "Checkout" }}</span>
